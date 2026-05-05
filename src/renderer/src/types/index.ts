@@ -14,13 +14,6 @@ export type LibraryState = {
   list: SFX[]
 }
 
-export type FavoriteFolder = {
-  id: string
-  name: string
-  items: string[] // array of SFX id
-  createdAt: string
-}
-
 export type PlaylistItem = {
   id: string
   rootId: string // reference SFX.id

@@ -6,12 +6,11 @@ import { audioService } from './services/audio.service'
 // Components
 import Navbar from './components/Navbar'
 import LibraryTab from './components/LibraryTab'
-import FavoriteTab from './components/FavoriteTab'
 import PlaylistTab from './components/PlaylistTab'
 import SettingsModal from './components/SettingsModal'
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'library' | 'favorite' | 'playlist'>('playlist')
+  const [activeTab, setActiveTab] = useState<'library' | 'playlist'>('playlist')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   
@@ -121,7 +120,6 @@ const App: React.FC = () => {
       
       <main className="flex-1 overflow-hidden p-8">
         {activeTab === 'library' && <LibraryTab />}
-        {activeTab === 'favorite' && <FavoriteTab />}
         {activeTab === 'playlist' && <PlaylistTab />}
       </main>
 

@@ -1,4 +1,4 @@
-import { SFX, Playlist, FavoriteFolder } from '../types'
+import { SFX, Playlist } from '../types'
 
 class FileService {
   async selectFile(): Promise<string | null> {
@@ -26,10 +26,9 @@ class FileService {
   }
 
   async readLibrary(): Promise<{ list: SFX[] } | null> {
-    // Check if file exists and has content before returning
     const data = await window.api.readJson('data/library/library_list.json')
     if (!data || !data.list || data.list.length === 0) {
-      return null // Indicate nothing to load
+      return null
     }
     return data
   }
@@ -39,7 +38,7 @@ class FileService {
     const playlist: Playlist = {
       id,
       name,
-      locked: false,
+      masterVolume: 100,
       items: [],
       createdAt: new Date().toISOString()
     }
@@ -57,28 +56,6 @@ class FileService {
       }
     }
     return playlists
-  }
-
-  async createFavoriteFolder(name: string): Promise<FavoriteFolder> {
-    const id = `fav_${Date.now()}`
-    const folder: FavoriteFolder = {
-      id,
-      name,
-      items: [],
-      createdAt: new Date().toISOString()
-    }
-    await window.api.writeJson(`data/favorite/${id}/${id}.json`, folder)
-    return folder
-  }
-
-  async readAllFavorites(): Promise<FavoriteFolder[]> {
-    const folderNames = await window.api.readDir('data/favorite')
-    const favorites: FavoriteFolder[] = []
-    for (const folderName of folderNames) {
-      const folderJson = await window.api.readJson(`data/favorite/${folderName}/${folderName}.json`)
-      if (folderJson && folderJson.id) favorites.push(folderJson)
-    }
-    return favorites
   }
 
   async readLanguage(lang: string): Promise<any> {

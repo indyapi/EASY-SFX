@@ -5,9 +5,11 @@ import { Playlist, PlaylistItem } from '../types'
 import AddSFXModal from './AddSFXModal'
 import CreatePlaylistModal from './CreatePlaylistModal'
 import PlaylistSFXItem from './PlaylistSFXItem'
-import { useWindowSize, getGridCols } from '../hooks/useWindowSize'
+import { useWindowSize } from '../hooks/useWindowSize'
+import { useDynamicGrid } from '../hooks/useDynamicGrid'
+import { useFullscreenSFX } from '../hooks/useFullscreenSFX'
 import { useHotkeyToggle } from '../hooks/useHotkeyToggle'
-import { Keyboard, Plus, ArrowLeft, Edit3, Trash2 } from 'lucide-react'
+import { Keyboard, Plus, ArrowLeft, Edit3, Trash2, Maximize2, Minimize2 } from 'lucide-react'
 
 const PlaylistCard: React.FC<{ 
   playlist: Playlist, 
@@ -61,11 +63,12 @@ const PlaylistCard: React.FC<{
 }
 
 const PlaylistTab: React.FC = () => {
-  const { width } = useWindowSize()
+  const { cols, setClampedCols, minCols, maxCols } = useDynamicGrid()
   const { isHotkeyEnabled } = useHotkeyToggle()
-  const gridCols = getGridCols(width)
+  const { isFullscreen, toggleFullscreen } = useFullscreenSFX()
 
   const playlists = useSoundStore((state) => state.playlists)
+  const sounds = useSoundStore((state) => state.sounds)
   const createNewPlaylist = useSoundStore((state) => state.createNewPlaylist)
   const removePlaylist = useSoundStore((state) => state.removePlaylist)
   const updatePlaylist = useSoundStore((state) => state.updatePlaylist)
@@ -108,7 +111,7 @@ const PlaylistTab: React.FC = () => {
     const pl = playlists.find(p => p.id === editingPlaylist.id) || editingPlaylist
 
     return (
-      <div className="flex h-full flex-col gap-6 sm:gap-8 animate-scale-in">
+      <div className={`flex h-full w-full flex-col gap-6 sm:gap-8 overflow-hidden animate-scale-in ${isFullscreen ? 'sfx-grid-container' : ''}`}>
         {/* Hotkey Status Bar */}
         <div className="flex items-center gap-4 p-4 sm:p-5 bg-tint/5 rounded-[24px] border border-tint/20 shadow-[0_10px_30px_rgba(0,217,255,0.05)]">
            <div className={`h-3 w-3 rounded-full ${isHotkeyEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-secondary/30'}`}></div>
@@ -117,7 +120,7 @@ const PlaylistTab: React.FC = () => {
                  System Hotkeys {isHotkeyEnabled ? 'Active' : 'Paused'}
               </span>
               <p className="text-[9px] font-bold text-secondary opacity-40 uppercase tracking-widest mt-0.5">
-                 Press <kbd className="px-1.5 py-0.5 bg-black/40 rounded border border-white/10 text-white mx-1">HOME</kbd> to toggle global shortcuts
+                 Press <kbd className="px-1.5 py-0.5 bg-black/40 rounded border border-white/10 text-white mx-1 font-mono">HOME</kbd> to toggle global shortcuts
               </p>
            </div>
            <div className="ml-auto hidden sm:flex items-center gap-2">
@@ -126,7 +129,7 @@ const PlaylistTab: React.FC = () => {
         </div>
 
         {/* Header bar for active playlist */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-6 sm:p-8 bg-black/40 rounded-[32px] sm:rounded-[48px] border border-white/5 shadow-2xl gap-6 sm:gap-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-6 sm:p-8 bg-black/40 rounded-[32px] sm:rounded-[48px] border border-white/5 shadow-2xl gap-6 sm:gap-8 shrink-0">
           <div className="flex items-center gap-4 sm:gap-8">
             <button onClick={() => setEditingPlaylist(null)} className="h-10 w-10 sm:h-14 sm:w-14 flex items-center justify-center rounded-xl sm:rounded-[24px] bg-white/5 text-secondary hover:text-white transition-all text-xl sm:text-2xl shadow-xl border border-white/5 active:scale-95">
                <ArrowLeft size={24} />
@@ -142,8 +145,19 @@ const PlaylistTab: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-6 sm:gap-12">
-            <div className="flex items-center gap-4 sm:gap-8 md:px-12 md:border-x border-white/5">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-6 sm:gap-10">
+            <div className="flex items-center gap-6 sm:gap-10 md:px-10 md:border-x border-white/5">
+              {/* Grid Control */}
+              <div className="flex items-center gap-4 bg-black/20 px-4 py-2 rounded-2xl border border-white/5 shadow-inner">
+                <span className="text-[9px] font-black text-secondary uppercase tracking-widest opacity-40 whitespace-nowrap">Grid:</span>
+                <input 
+                  type="range" min={minCols} max={maxCols} value={cols} 
+                  onChange={(e) => setClampedCols(parseInt(e.target.value))}
+                  className="w-24 h-1 bg-black/40 rounded-lg appearance-none cursor-pointer accent-tint"
+                />
+                <span className="text-[10px] font-black text-tint tabular-nums w-4 text-center">{cols}</span>
+              </div>
+
               <div className="flex flex-col items-end gap-1">
                 <span className="text-[9px] sm:text-[10px] font-black text-secondary opacity-30 uppercase tracking-widest">{t.playlist?.masterVolume}</span>
                 <span className="text-base sm:text-lg font-black text-tint tabular-nums">{pl.masterVolume}%</span>
@@ -162,6 +176,16 @@ const PlaylistTab: React.FC = () => {
               <Plus size={16} strokeWidth={3} />
               {t.playlist?.addSounds || 'CONFIGURE BOARD'}
             </button>
+
+            <button 
+              onClick={toggleFullscreen}
+              className={`
+                h-11 w-11 flex items-center justify-center rounded-2xl transition-all shadow-lg active:scale-95 border
+                ${isFullscreen ? 'bg-tint text-zinc-950 border-tint shadow-tint/20' : 'bg-white/5 text-secondary border-white/5 hover:bg-white/10'}
+              `}
+            >
+              {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            </button>
           </div>
         </div>
 
@@ -169,7 +193,7 @@ const PlaylistTab: React.FC = () => {
         <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
           <div 
             className="grid gap-4 sm:gap-8 pb-12"
-            style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
           >
             {pl.items.map(item => (
                <PlaylistSFXItem 

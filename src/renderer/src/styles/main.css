@@ -133,3 +133,25 @@
     box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
   }
 }
+
+/* Fullscreen Overlay Logic */
+.sfx-fullscreen main {
+  padding: 0 !important;
+}
+
+.sfx-fullscreen .sfx-grid-container {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  background: var(--bg-app);
+  padding: 2rem;
+  overflow-y: auto;
+  animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sfx-fullscreen nav {
+    display: none !important;
+}

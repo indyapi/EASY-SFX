@@ -3,8 +3,8 @@ import logo from '../../../../resources/assets/imgs/easysfx.png'
 import { useSoundStore } from '../store/useSoundStore'
 
 interface NavbarProps {
-  activeTab: 'library' | 'favorite' | 'playlist'
-  onTabChange: (tab: 'library' | 'favorite' | 'playlist') => void
+  activeTab: 'library' | 'playlist'
+  onTabChange: (tab: 'library' | 'playlist') => void
   onSettingsClick: () => void
 }
 
@@ -27,7 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, onSettingsClick
 
       {/* Center: Tabs (Responsive) */}
       <div className="flex items-center gap-1 sm:gap-1.5 rounded-2xl bg-black/40 p-1 sm:p-1.5 border border-white/5 mx-2">
-        {(['library', 'favorite', 'playlist'] as const).map((tab) => (
+        {(['library', 'playlist'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => onTabChange(tab)}
@@ -39,7 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, onSettingsClick
             `}
           >
             <span className="hidden sm:inline">{t.nav?.[tab]}</span>
-            <span className="sm:hidden">{tab === 'library' ? '📦' : tab === 'favorite' ? '❤️' : '🍱'}</span>
+            <span className="sm:hidden">{tab === 'library' ? '📦' : '🍱'}</span>
           </button>
         ))}
       </div>

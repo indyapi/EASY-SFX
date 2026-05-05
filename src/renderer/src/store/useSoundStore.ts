@@ -1,11 +1,10 @@
 import { create } from 'zustand'
-import { SFX, Playlist, FavoriteFolder, PlayMode } from '../types'
+import { SFX, Playlist, PlayMode } from '../types'
 import { fileService } from '../services/file.service'
 
 interface SoundState {
   sounds: SFX[] // Local imports
   playlists: Playlist[]
-  favorites: FavoriteFolder[]
   isLoading: boolean
   
   // Settings
@@ -34,16 +33,11 @@ interface SoundState {
   createNewPlaylist: (name: string) => Promise<void>
   updatePlaylist: (playlist: Playlist) => Promise<void>
   removePlaylist: (id: string) => Promise<void>
-  
-  createNewFavoriteFolder: (name: string) => Promise<void>
-  updateFavoriteFolder: (folder: FavoriteFolder) => Promise<void>
-  removeFavoriteFolder: (id: string) => Promise<void>
 }
 
 export const useSoundStore = create<SoundState>((set, get) => ({
   sounds: [],
   playlists: [],
-  favorites: [],
   isLoading: false,
   theme: 'dark',
   language: 'en',
@@ -72,15 +66,11 @@ export const useSoundStore = create<SoundState>((set, get) => ({
       const libraryData = await fileService.readLibrary()
       
       // 2. Read other local data
-      const [playlists, favorites] = await Promise.all([
-        fileService.readAllPlaylists(),
-        fileService.readAllFavorites()
-      ])
+      const playlists = await fileService.readAllPlaylists()
 
       set({ 
         sounds: libraryData ? libraryData.list : [], 
         playlists, 
-        favorites,
         theme,
         language,
         gridColumns,
@@ -191,31 +181,5 @@ export const useSoundStore = create<SoundState>((set, get) => ({
   removePlaylist: async (id) => {
     await window.api.deleteFile(`data/playlist/${id}.json`)
     set((state) => ({ playlists: state.playlists.filter((p) => p.id !== id) }))
-  },
-
-  createNewFavoriteFolder: async (name: string) => {
-    const id = `fav_${Date.now()}`
-    const folder: FavoriteFolder = {
-      id,
-      name,
-      items: [],
-      createdAt: new Date().toISOString()
-    }
-    // Store in dedicated folder as requested
-    await window.api.writeJson(`data/favorite/${id}/${id}.json`, folder)
-    set((state) => ({ favorites: [...state.favorites, folder] }))
-  },
-
-  updateFavoriteFolder: async (folder) => {
-    await window.api.writeJson(`data/favorite/${folder.id}/${folder.id}.json`, folder)
-    set((state) => ({
-      favorites: state.favorites.map((f) => (f.id === folder.id ? folder : f))
-    }))
-  },
-
-  removeFavoriteFolder: async (id) => {
-    // Delete the whole directory for the favorite
-    await window.api.deleteFile(`data/favorite/${id}`)
-    set((state) => ({ favorites: state.favorites.filter((f) => f.id !== id) }))
   }
 }))
