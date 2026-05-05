@@ -11,6 +11,7 @@ const api = {
   writeJson: (path: string, data: any) => ipcRenderer.invoke('write-json', path, data),
   deleteFile: (path: string) => ipcRenderer.invoke('delete-file', path),
   importFile: (sourcePath: string) => ipcRenderer.invoke('import-file', sourcePath),
+  playSfxFile: (filePath: string) => ipcRenderer.invoke('play-sfx-file', filePath),
   downloadSound: (url: string, playlistId: string, id: string) =>
     ipcRenderer.invoke('download-sound', url, playlistId, id),
   registerShortcut: (accelerator: string) => ipcRenderer.invoke('register-shortcut', accelerator),

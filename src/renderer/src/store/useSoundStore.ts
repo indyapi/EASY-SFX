@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { SFX, Playlist, FavoriteFolder } from '../types'
+import { SFX, Playlist, FavoriteFolder, PlayMode } from '../types'
 import { fileService } from '../services/file.service'
 
 interface SoundState {
@@ -13,6 +13,7 @@ interface SoundState {
   language: 'en' | 'th'
   gridColumns: number
   libraryMasterVolume: number
+  playMode: PlayMode
   translations: any
   playingSfxId: string | null
 
@@ -22,6 +23,7 @@ interface SoundState {
   setLanguage: (lang: 'en' | 'th') => Promise<void>
   setGridColumns: (cols: number) => void
   setLibraryMasterVolume: (vol: number) => void
+  setPlayMode: (mode: PlayMode) => void
   setPlayingSfxId: (id: string | null) => void
   
   importLocalSound: (path: string) => Promise<void>
@@ -45,6 +47,7 @@ export const useSoundStore = create<SoundState>((set, get) => ({
   language: 'en',
   gridColumns: 8,
   libraryMasterVolume: 100,
+  playMode: 'overlap',
   translations: {},
   playingSfxId: null,
 
@@ -57,6 +60,7 @@ export const useSoundStore = create<SoundState>((set, get) => ({
       const language = settings?.language || 'en'
       const gridColumns = settings?.gridColumns || 8
       const libraryMasterVolume = settings?.libraryMasterVolume !== undefined ? settings.libraryMasterVolume : 100
+      const playMode = settings?.playMode || 'overlap'
       
       // Load translations
       const translations = await fileService.readLanguage(language)
@@ -78,9 +82,13 @@ export const useSoundStore = create<SoundState>((set, get) => ({
         language,
         gridColumns,
         libraryMasterVolume,
+        playMode,
         translations,
         isLoading: false 
       })
+
+      // Apply initial theme
+      document.documentElement.classList.toggle('dark', theme === 'dark')
     } catch (error) {
       console.error('Store initialization failed:', error)
       set({ isLoading: false })
@@ -89,26 +97,47 @@ export const useSoundStore = create<SoundState>((set, get) => ({
 
   setTheme: (theme) => {
     set({ theme })
-    const settings = { theme, language: get().language, gridColumns: get().gridColumns, libraryMasterVolume: get().libraryMasterVolume }
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+    const state = get()
+    const settings = { 
+      theme, 
+      language: state.language, 
+      gridColumns: state.gridColumns, 
+      libraryMasterVolume: state.libraryMasterVolume, 
+      playMode: state.playMode 
+    }
     window.api.writeJson('data/settings.json', settings)
   },
 
   setLanguage: async (language) => {
     const translations = await fileService.readLanguage(language)
     set({ language, translations })
-    const settings = { theme: get().theme, language, gridColumns: get().gridColumns, libraryMasterVolume: get().libraryMasterVolume }
+    const state = get()
+    const settings = { 
+      theme: state.theme, 
+      language, 
+      gridColumns: state.gridColumns, 
+      libraryMasterVolume: state.libraryMasterVolume, 
+      playMode: state.playMode 
+    }
     window.api.writeJson('data/settings.json', settings)
   },
 
   setGridColumns: (gridColumns) => {
     set({ gridColumns })
-    const settings = { theme: get().theme, language: get().language, gridColumns, libraryMasterVolume: get().libraryMasterVolume }
+    const settings = { theme: get().theme, language: get().language, gridColumns, libraryMasterVolume: get().libraryMasterVolume, playMode: get().playMode }
     window.api.writeJson('data/settings.json', settings)
   },
 
   setLibraryMasterVolume: (libraryMasterVolume) => {
     set({ libraryMasterVolume })
-    const settings = { theme: get().theme, language: get().language, gridColumns: get().gridColumns, libraryMasterVolume }
+    const settings = { theme: get().theme, language: get().language, gridColumns: get().gridColumns, libraryMasterVolume, playMode: get().playMode }
+    window.api.writeJson('data/settings.json', settings)
+  },
+
+  setPlayMode: (playMode) => {
+    set({ playMode })
+    const settings = { theme: get().theme, language: get().language, gridColumns: get().gridColumns, libraryMasterVolume: get().libraryMasterVolume, playMode }
     window.api.writeJson('data/settings.json', settings)
   },
 

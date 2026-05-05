@@ -9,9 +9,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const theme = useSoundStore((state) => state.theme)
   const language = useSoundStore((state) => state.language)
   const gridColumns = useSoundStore((state) => state.gridColumns)
+  const libraryMasterVolume = useSoundStore((state) => state.libraryMasterVolume)
+  const playMode = useSoundStore((state) => state.playMode)
   const setTheme = useSoundStore((state) => state.setTheme)
   const setLanguage = useSoundStore((state) => state.setLanguage)
   const setGridColumns = useSoundStore((state) => state.setGridColumns)
+  const setLibraryMasterVolume = useSoundStore((state) => state.setLibraryMasterVolume)
+  const setPlayMode = useSoundStore((state) => state.setPlayMode)
   const t = useSoundStore((state) => state.translations)
 
   return (
@@ -77,6 +81,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
             </div>
           </div>
 
+          {/* Master Volume */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-black uppercase tracking-widest text-secondary opacity-70">
+                {t.playlist?.masterVolume}
+              </label>
+              <span className="text-sm font-black text-tint">{libraryMasterVolume}%</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <input 
+                type="range" 
+                min="0" 
+                max="200" 
+                value={libraryMasterVolume} 
+                onChange={(e) => setLibraryMasterVolume(parseInt(e.target.value))}
+                className="w-full h-1.5 bg-nav rounded-lg appearance-none cursor-pointer accent-tint"
+              />
+            </div>
+          </div>
+
           {/* Grid Size Adjustment */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
@@ -99,6 +123,30 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
               <span>4</span>
               <span>11</span>
               <span>18</span>
+            </div>
+          </div>
+
+          {/* Playback Mode */}
+          <div className="flex flex-col gap-4">
+            <label className="text-xs font-black uppercase tracking-widest text-secondary opacity-70">
+              {t.settings?.playMode}
+            </label>
+            <div className="grid grid-cols-1 gap-2">
+              {(['overlap', 'exclusive', 'queue'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setPlayMode(mode)}
+                  className={`
+                    px-4 py-2.5 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all text-left flex items-center justify-between
+                    ${playMode === mode 
+                      ? 'border-tint text-tint bg-tint/5 shadow-inner' 
+                      : 'border-transparent nav-bg text-secondary hover:border-zinc-700'}
+                  `}
+                >
+                  <span>{t.settings?.[mode]}</span>
+                  {playMode === mode && <span className="text-[8px]">✓</span>}
+                </button>
+              ))}
             </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ declare global {
       writeJson: (path: string, data: any) => Promise<boolean>
       deleteFile: (path: string) => Promise<boolean>
       importFile: (sourcePath: string) => Promise<string>
+      playSfxFile: (filePath: string) => Promise<void>
       downloadSound: (url: string, playlistId: string, id: string) => Promise<string | null>
       registerShortcut: (accelerator: string) => Promise<boolean>
       unregisterShortcut: (accelerator: string) => Promise<void>

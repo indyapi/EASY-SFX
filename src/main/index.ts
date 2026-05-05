@@ -263,6 +263,18 @@ app.whenReady().then(() => {
     }
   })
 
+  ipcMain.handle('play-sfx-file', (_, filePath: string) => {
+    console.log(`[SFX IPC] Attempting fallback playback for: ${filePath}`)
+    // Since we can't install play-sound, we use a PowerShell fallback for Windows
+    if (process.platform === 'win32') {
+        const { exec } = require('child_process')
+        const command = `powershell -c "Add-Type -AssemblyName PresentationCore; $player = New-Object System.Windows.Media.MediaPlayer; $player.Open('${filePath}'); $player.Play(); Start-Sleep -s 10"`
+        exec(command, (error: any) => {
+            if (error) console.error(`[SFX IPC] PowerShell playback failed:`, error)
+        })
+    }
+  })
+
   ipcMain.handle('unregister-shortcut', (_, accelerator: string) => {
     globalShortcut.unregister(accelerator)
   })

@@ -215,6 +215,16 @@ electron.app.whenReady().then(() => {
       return false;
     }
   });
+  electron.ipcMain.handle("play-sfx-file", (_, filePath) => {
+    console.log(`[SFX IPC] Attempting fallback playback for: ${filePath}`);
+    if (process.platform === "win32") {
+      const { exec } = require("child_process");
+      const command = `powershell -c "Add-Type -AssemblyName PresentationCore; $player = New-Object System.Windows.Media.MediaPlayer; $player.Open('${filePath}'); $player.Play(); Start-Sleep -s 10"`;
+      exec(command, (error) => {
+        if (error) console.error(`[SFX IPC] PowerShell playback failed:`, error);
+      });
+    }
+  });
   electron.ipcMain.handle("unregister-shortcut", (_, accelerator) => {
     electron.globalShortcut.unregister(accelerator);
   });

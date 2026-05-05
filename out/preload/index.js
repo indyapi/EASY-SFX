@@ -10,6 +10,7 @@ const api = {
   writeJson: (path, data) => electron.ipcRenderer.invoke("write-json", path, data),
   deleteFile: (path) => electron.ipcRenderer.invoke("delete-file", path),
   importFile: (sourcePath) => electron.ipcRenderer.invoke("import-file", sourcePath),
+  playSfxFile: (filePath) => electron.ipcRenderer.invoke("play-sfx-file", filePath),
   downloadSound: (url, playlistId, id) => electron.ipcRenderer.invoke("download-sound", url, playlistId, id),
   registerShortcut: (accelerator) => electron.ipcRenderer.invoke("register-shortcut", accelerator),
   unregisterShortcut: (accelerator) => electron.ipcRenderer.invoke("unregister-shortcut", accelerator),

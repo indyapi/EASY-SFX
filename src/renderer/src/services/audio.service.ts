@@ -27,25 +27,38 @@ class AudioService {
 
     this.log(`Attempting to play: ${sfx.name} (Volume: ${finalVolume}%)`, 'info')
 
-    // Stop existing instance if same ID is playing
-    soundEngine.stop(sfx.id)
+    // Handle play modes
+    if (store.playMode === 'exclusive') {
+        soundEngine.stopAll()
+    } else if (store.playMode === 'overlap') {
+        // In overlap mode, we just let it play. 
+        // If we wanted to stop previous instance of SAME sound, we would call soundEngine.stop(sfx.id)
+        // but for a soundboard, true overlap is usually preferred.
+    }
 
-    const player = soundEngine.createInstance(
+    await soundEngine.play(
       sfx, 
       finalVolume,
+      store.playMode,
+      () => {
+        setPlayingId(sfx.id)
+      },
       () => {
         this.log(`Finished: ${sfx.name}`, 'info')
-        setPlayingId(null)
+        if (!soundEngine.hasActiveInstances(sfx.id)) {
+            setPlayingId(null)
+        }
       },
       (error) => {
-        this.log(`Error playing ${sfx.name}: ${error}`, 'error')
-        setPlayingId(null)
+        this.log(`Error playing ${sfx.name}: ${error}. Attempting IPC fallback.`, 'error')
+        window.api.playSfxFile(sfx.filePath)
+        if (!soundEngine.hasActiveInstances(sfx.id)) {
+            setPlayingId(null)
+        }
       }
     )
 
-    setPlayingId(sfx.id)
-    player.play()
-    this.log(`Playing: ${sfx.name}`, 'success')
+    this.log(`Requested: ${sfx.name}`, 'success')
   }
 
   stop(id: string): void {

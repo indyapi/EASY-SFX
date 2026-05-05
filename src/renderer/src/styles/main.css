@@ -1,6 +1,73 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* EASY SFX palette */
+  --color-tint: #00d9ff;
+  --color-tint-hover: #00b4d4;
+  
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  
+  --color-app: var(--bg-app);
+  --color-nav: var(--bg-nav);
+  --color-card: var(--bg-card);
+  --color-card-hover: var(--bg-card-hover);
+  
+  --color-border: var(--border-color);
+
+  --animate-ping-large: ping-large 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
+  --animate-scale-in: scale-in 0.2s ease-out forwards;
+  --animate-pulse-subtle: pulse-subtle 2s infinite ease-in-out;
+  --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes ping-large {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
+  }
+
+  @keyframes scale-in {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+
+  @keyframes slide-up {
+    0% { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+}
+
+:root {
+  --bg-app: #fffdf5;
+  --bg-nav: #fdfaf0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fcf9e8;
+  --text-primary: #3d3d3d;
+  --text-secondary: #7a7a7a;
+  --border-color: #eee9d5;
+  --tint-color: #00acc1;
+  --tint-hover: #0097a7;
+  --scrollbar-thumb: #e0dbca;
+}
+
+.dark {
+  --bg-app: #09090b;
+  --bg-nav: #050507;
+  --bg-card: #121214;
+  --bg-card-hover: #1c1c1f;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.05);
+  --tint-color: #00d9ff;
+  --tint-hover: #00b4d4;
+  --scrollbar-thumb: #334155;
+}
 
 @layer base {
   body {
@@ -23,33 +90,6 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     filter: brightness(1.2);
   }
-}
-
-@keyframes ping-large {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-  100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
-}
-
-@keyframes scale-in {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
-}
-
-.animate-ping {
-  animation: ping-large 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
-}
-
-.animate-scale-in {
-  animation: scale-in 0.2s ease-out forwards;
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s infinite ease-in-out;
 }
 
 @layer components {

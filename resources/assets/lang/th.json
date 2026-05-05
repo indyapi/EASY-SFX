@@ -19,6 +19,10 @@
     "dark": "มืด",
     "light": "สว่าง",
     "gridSize": "จำนวนคอลัมน์",
+    "playMode": "โหมดการเล่น",
+    "overlap": "ซ้อนทับ",
+    "exclusive": "หยุดก่อนหน้า",
+    "queue": "คิวรอ",
     "done": "ตกลง"
   },
   "favorite": {

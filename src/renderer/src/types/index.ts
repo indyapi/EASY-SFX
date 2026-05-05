@@ -8,6 +8,8 @@ export type SFX = {
   createdAt: string
 }
 
+export type PlayMode = 'overlap' | 'exclusive' | 'queue'
+
 export type LibraryState = {
   list: SFX[]
 }

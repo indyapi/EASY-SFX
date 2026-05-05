@@ -10,6 +10,8 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, onSettingsClick }) => {
   const t = useSoundStore((state) => state.translations)
+  const theme = useSoundStore((state) => state.theme)
+  const setTheme = useSoundStore((state) => state.setTheme)
 
   return (
     <nav className="flex h-16 w-full items-center justify-between border-b nav-bg px-6">
@@ -38,14 +40,23 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, onSettingsClick
       </div>
 
       {/* Right: Icons */}
-      <div className="flex items-center gap-4 text-secondary">
-        <button 
-          onClick={onSettingsClick}
-          title={t.nav?.settings} 
-          className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-white/5 hover:text-tint transition-all text-lg"
-        >
-          ⚙️
-        </button>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 text-secondary">
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Toggle Theme"
+            className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 hover:border-tint/30 hover:text-tint transition-all text-lg shadow-lg active:scale-95"
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button 
+            onClick={onSettingsClick}
+            title={t.nav?.settings} 
+            className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-white/5 hover:text-tint transition-all text-lg shadow-lg active:scale-95 border border-transparent hover:border-white/5"
+          >
+            ⚙️
+          </button>
+        </div>
       </div>
     </nav>
   )

@@ -19,32 +19,19 @@ const App: React.FC = () => {
   const playlists = useSoundStore((state) => state.playlists)
   const sounds = useSoundStore((state) => state.sounds)
   const theme = useSoundStore((state) => state.theme)
+  const libraryMasterVolume = useSoundStore((state) => state.libraryMasterVolume)
   const t = useSoundStore((state) => state.translations)
 
   useEffect(() => {
     initStore()
   }, [initStore])
 
-  // Apply Theme
+  // Sync Master Volume
   useEffect(() => {
-    const applyTheme = async () => {
-      const resourcesDir = await window.api.getResourcesDir()
-      const linkId = 'theme-link'
-      let link = document.getElementById(linkId) as HTMLLinkElement
-      if (!link) {
-        link = document.createElement('link')
-        link.id = linkId
-        link.rel = 'stylesheet'
-        document.head.appendChild(link)
-      }
-      
-      const themePath = `${resourcesDir}/assets/styles/${theme}.css`.replace(/\\/g, '/')
-      link.href = `file:///${themePath}?t=${Date.now()}`
-      document.body.className = `theme-${theme}`
-    }
-    
-    applyTheme()
-  }, [theme])
+    import('./services/soundEngine').then(({ soundEngine }) => {
+      soundEngine.setMasterVolume(libraryMasterVolume)
+    })
+  }, [libraryMasterVolume])
 
   useEffect(() => {
     hotkeyService.init()
@@ -98,7 +85,7 @@ const App: React.FC = () => {
 
       {isSettingsOpen && <SettingsModal onClose={() => setIsSettingsOpen(false)} />}
 
-      <div className="fixed bottom-4 right-4 text-[9px] font-black text-secondary opacity-20 uppercase tracking-widest pointer-events-none">
+      <div className="fixed bottom-2 right-4 text-[7px] font-black text-secondary opacity-10 uppercase tracking-widest pointer-events-none z-40">
         Easy SFX v1.0 • Ctrl+Shift+D for DevTools
       </div>
     </div>
