@@ -4,6 +4,10 @@ import { audioService } from '../services/audio.service'
 import { Playlist, PlaylistItem } from '../types'
 import AddSFXModal from './AddSFXModal'
 import CreatePlaylistModal from './CreatePlaylistModal'
+import PlaylistSFXItem from './PlaylistSFXItem'
+import { useWindowSize, getGridCols } from '../hooks/useWindowSize'
+import { useHotkeyToggle } from '../hooks/useHotkeyToggle'
+import { Keyboard, Plus, ArrowLeft, Edit3, Trash2 } from 'lucide-react'
 
 const PlaylistCard: React.FC<{ 
   playlist: Playlist, 
@@ -28,7 +32,7 @@ const PlaylistCard: React.FC<{
               className="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl sm:rounded-2xl bg-red-900/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-xl"
               title="Delete Board"
             >
-              🗑️
+              <Trash2 size={16} />
             </button>
           </div>
         </div>
@@ -57,8 +61,11 @@ const PlaylistCard: React.FC<{
 }
 
 const PlaylistTab: React.FC = () => {
+  const { width } = useWindowSize()
+  const { isHotkeyEnabled } = useHotkeyToggle()
+  const gridCols = getGridCols(width)
+
   const playlists = useSoundStore((state) => state.playlists)
-  const sounds = useSoundStore((state) => state.sounds)
   const createNewPlaylist = useSoundStore((state) => state.createNewPlaylist)
   const removePlaylist = useSoundStore((state) => state.removePlaylist)
   const updatePlaylist = useSoundStore((state) => state.updatePlaylist)
@@ -81,24 +88,16 @@ const PlaylistTab: React.FC = () => {
     }
   }
 
-  const handlePlay = (item: PlaylistItem) => {
-    const sfx = sounds.find(s => s.id === item.rootId)
-    const pl = playlists.find(p => p.id === editingPlaylist?.id)
-    if (sfx && pl) {
-      const finalVolume = (item.volume / 100) * (pl.masterVolume / 100) * 100
-      audioService.play(sfx, pl.id, finalVolume)
-    }
-  }
-
-  const handleUpdateVolume = async (item: PlaylistItem, vol: number) => {
-    if (!editingPlaylist) return
-    const newItems = editingPlaylist.items.map(i => i.id === item.id ? { ...i, volume: vol } : i)
-    await updatePlaylist({ ...editingPlaylist, items: newItems })
-  }
-
   const handleUpdateMasterVolume = async (vol: number) => {
     if (!editingPlaylist) return
     await updatePlaylist({ ...editingPlaylist, masterVolume: vol })
+  }
+
+  const handleRemoveItem = async (itemId: string) => {
+    if (editingPlaylist) {
+       const newItems = editingPlaylist.items.filter(i => i.id !== itemId)
+       await updatePlaylist({ ...editingPlaylist, items: newItems })
+    }
   }
 
   const handleOpenPlaylist = (pl: Playlist) => {
@@ -110,16 +109,36 @@ const PlaylistTab: React.FC = () => {
 
     return (
       <div className="flex h-full flex-col gap-6 sm:gap-8 animate-scale-in">
+        {/* Hotkey Status Bar */}
+        <div className="flex items-center gap-4 p-4 sm:p-5 bg-tint/5 rounded-[24px] border border-tint/20 shadow-[0_10px_30px_rgba(0,217,255,0.05)]">
+           <div className={`h-3 w-3 rounded-full ${isHotkeyEnabled ? 'bg-emerald-500 animate-pulse' : 'bg-secondary/30'}`}></div>
+           <div className="flex flex-col">
+              <span className="text-[10px] font-black uppercase tracking-widest text-tint">
+                 System Hotkeys {isHotkeyEnabled ? 'Active' : 'Paused'}
+              </span>
+              <p className="text-[9px] font-bold text-secondary opacity-40 uppercase tracking-widest mt-0.5">
+                 Press <kbd className="px-1.5 py-0.5 bg-black/40 rounded border border-white/10 text-white mx-1">HOME</kbd> to toggle global shortcuts
+              </p>
+           </div>
+           <div className="ml-auto hidden sm:flex items-center gap-2">
+              <Keyboard size={16} className="text-secondary opacity-20" />
+           </div>
+        </div>
+
         {/* Header bar for active playlist */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between p-6 sm:p-8 bg-black/40 rounded-[32px] sm:rounded-[48px] border border-white/5 shadow-2xl gap-6 sm:gap-8">
           <div className="flex items-center gap-4 sm:gap-8">
-            <button onClick={() => setEditingPlaylist(null)} className="h-10 w-10 sm:h-14 sm:w-14 flex items-center justify-center rounded-xl sm:rounded-[24px] bg-white/5 text-secondary hover:text-white transition-all text-xl sm:text-2xl shadow-xl">←</button>
+            <button onClick={() => setEditingPlaylist(null)} className="h-10 w-10 sm:h-14 sm:w-14 flex items-center justify-center rounded-xl sm:rounded-[24px] bg-white/5 text-secondary hover:text-white transition-all text-xl sm:text-2xl shadow-xl border border-white/5 active:scale-95">
+               <ArrowLeft size={24} />
+            </button>
             <div>
               <div className="flex items-center gap-3 sm:gap-4">
                   <h2 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white truncate max-w-[150px] sm:max-w-none">{pl.name}</h2>
-                  <button onClick={() => setRenamingPlaylist(pl)} className="text-tint opacity-30 hover:opacity-100 transition-all text-sm">✎</button>
+                  <button onClick={() => setRenamingPlaylist(pl)} className="text-tint opacity-30 hover:opacity-100 transition-all">
+                     <Edit3 size={18} />
+                  </button>
               </div>
-              <p className="text-[9px] sm:text-[11px] font-black text-secondary opacity-30 uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1">{pl.items.length} SOUNDS CONFIGURED</p>
+              <p className="text-[9px] sm:text-[11px] font-black text-secondary opacity-30 uppercase tracking-widest sm:tracking-[0.3em] mt-1">{pl.items.length} SOUNDS CONFIGURED</p>
             </div>
           </div>
 
@@ -138,75 +157,28 @@ const PlaylistTab: React.FC = () => {
 
             <button 
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-4 sm:px-10 sm:py-4.5 rounded-2xl sm:rounded-[24px] bg-gradient-to-r from-tint to-sky-600 text-zinc-950 font-black text-[10px] sm:text-xs uppercase tracking-widest sm:tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all"
+              className="px-6 py-4 sm:px-10 sm:py-4.5 rounded-2xl sm:rounded-[24px] bg-gradient-to-r from-tint to-sky-600 text-zinc-950 font-black text-[10px] sm:text-xs uppercase tracking-widest sm:tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3"
             >
-              {t.playlist?.addSounds || '+ CONFIGURE BOARD'}
+              <Plus size={16} strokeWidth={3} />
+              {t.playlist?.addSounds || 'CONFIGURE BOARD'}
             </button>
           </div>
         </div>
 
         {/* SFX Grid for active playlist */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 sm:gap-8 pb-12 pr-2">
-            {pl.items.map(item => {
-              const sfx = sounds.find(s => s.id === item.rootId)
-              return (
-                <div key={item.id} className="group relative rounded-[32px] sm:rounded-[44px] bg-white/[0.02] border border-white/5 p-6 sm:p-8 transition-all hover:border-tint/40 shadow-xl hover:-translate-y-2 overflow-hidden">
-                  <div className="flex h-full flex-col gap-6 sm:gap-8">
-                    <div className="flex items-center justify-between">
-                      <div className="h-12 w-12 sm:h-16 sm:w-16 flex items-center justify-center rounded-[18px] sm:rounded-[24px] bg-black/40 text-2xl sm:text-4xl cursor-pointer hover:scale-110 active:scale-90 transition-all border border-white/5 shadow-inner" onClick={() => handlePlay(item)}>
-                        🔊
-                      </div>
-                      <div className="flex flex-col items-end gap-1.5 sm:gap-2">
-                         <span className="text-[8px] sm:text-[9px] font-black text-secondary opacity-30 uppercase tracking-widest">{t.playlist?.hotkey}</span>
-                         <span className="px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-black/60 text-[9px] sm:text-[10px] font-black text-tint border border-tint/30 shadow-lg tabular-nums">
-                           {item.hotkey || 'UNSET'}
-                         </span>
-                      </div>
-                    </div>
-                    
-                    <div className="w-full relative px-1">
-                      <div className="flex items-center justify-between group/name">
-                          <p className="text-base sm:text-lg font-black text-white truncate uppercase tracking-tight pr-4 flex-1">{item.customName || item.rootName}</p>
-                          <button onClick={() => {
-                             const n = window.prompt('Custom name:', item.customName || item.rootName)
-                             if (n) {
-                               const newItems = pl.items.map(i => i.id === item.id ? {...i, customName: n} : i)
-                               updatePlaylist({...pl, items: newItems})
-                             }
-                          }} className="opacity-0 group-hover/name:opacity-100 text-tint transition-all text-sm">✎</button>
-                      </div>
-                      <p className="text-[9px] sm:text-[10px] font-bold text-secondary opacity-20 truncate italic mt-1 uppercase tracking-tighter">Original: {item.rootName}</p>
-                    </div>
-
-                    <div className="flex flex-col gap-2 sm:gap-3 mt-auto pt-4 sm:pt-6 border-t border-white/5">
-                      <div className="flex items-center justify-between px-1">
-                        <span className="text-[9px] sm:text-[10px] font-black text-secondary opacity-30 uppercase tracking-widest">{t.playlist?.volume}</span>
-                        <span className="text-[10px] sm:text-[11px] font-black text-tint tabular-nums">{item.volume}%</span>
-                      </div>
-                      <input 
-                        type="range" min="0" max="100" value={item.volume} 
-                        onChange={(e) => handleUpdateVolume(item, parseInt(e.target.value))}
-                        className="w-full h-1 bg-black/40 rounded-lg appearance-none cursor-pointer accent-tint"
-                      />
-                    </div>
-                  </div>
-                  
-                  <button 
-                    onClick={async (e) => {
-                       e.stopPropagation();
-                       if (confirm('Remove from board?')) {
-                         const newItems = pl.items.filter(i => i.id !== item.id)
-                         updatePlaylist({...pl, items: newItems})
-                       }
-                    }}
-                    className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-red-500 text-white flex items-center justify-center text-sm sm:text-xl opacity-100 lg:opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-90 transition-all shadow-2xl z-10 border-4 sm:border-[6px] border-zinc-950"
-                  >
-                    ×
-                  </button>
-                </div>
-              )
-            })}
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+          <div 
+            className="grid gap-4 sm:gap-8 pb-12"
+            style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+          >
+            {pl.items.map(item => (
+               <PlaylistSFXItem 
+                key={item.id} 
+                item={item} 
+                playlistId={pl.id} 
+                onDelete={() => handleRemoveItem(item.id)}
+               />
+            ))}
             {pl.items.length === 0 && (
                 <div className="col-span-full h-80 sm:h-96 flex flex-col items-center justify-center bg-black/10 rounded-[48px] sm:rounded-[64px] border border-dashed border-white/5 gap-6 sm:gap-8 animate-pulse">
                    <div className="text-6xl sm:text-8xl opacity-10">🍱</div>
@@ -234,9 +206,10 @@ const PlaylistTab: React.FC = () => {
         </div>
         <button 
           onClick={() => setShowCreateModal(true)}
-          className="px-8 py-4 sm:px-10 sm:py-5 rounded-[18px] sm:rounded-[24px] bg-white/5 border border-white/10 text-[10px] sm:text-[11px] font-black uppercase tracking-widest sm:tracking-[0.2em] text-secondary hover:text-tint hover:border-tint/40 transition-all shadow-2xl active:scale-95"
+          className="px-8 py-4 sm:px-10 sm:py-5 rounded-[18px] sm:rounded-[24px] bg-white/5 border border-white/10 text-[10px] sm:text-[11px] font-black uppercase tracking-widest sm:tracking-[0.2em] text-secondary hover:text-tint hover:border-tint/40 transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3"
         >
-          {t.playlist?.new || '+ NEW BOARD'}
+          <Plus size={16} strokeWidth={3} />
+          {t.playlist?.new || 'NEW BOARD'}
         </button>
       </div>
 
@@ -245,12 +218,12 @@ const PlaylistTab: React.FC = () => {
         <div className="flex flex-1 items-center justify-center p-4">
             <button 
               onClick={() => setShowCreateModal(true)}
-              className="group relative flex flex-col items-center gap-6 sm:gap-10 p-12 sm:p-24 rounded-[48px] sm:rounded-[80px] border border-dashed border-white/10 hover:border-tint/50 transition-all bg-black/10 w-full max-w-2xl"
+              className="group relative flex flex-col items-center gap-6 sm:gap-10 p-12 sm:p-24 rounded-[48px] sm:rounded-[80px] border border-dashed border-white/10 hover:border-tint/50 transition-all bg-black/10 w-full max-w-2xl shadow-inner"
             >
               <div className="text-8xl sm:text-[120px] group-hover:scale-110 transition-all duration-700 group-hover:rotate-12">🍱</div>
               <div className="text-center space-y-3 sm:space-y-4">
                   <p className="text-secondary font-black uppercase tracking-widest sm:tracking-[0.4em] text-xl sm:text-2xl opacity-60">No boards active</p>
-                  <p className="text-secondary opacity-20 text-xs sm:text-sm font-bold uppercase tracking-widest">Construct your first professional layout</p>
+                  <p className="text-secondary opacity-20 text-sm font-bold uppercase tracking-widest">Construct your first professional layout</p>
               </div>
               <span className="text-[10px] sm:text-[11px] font-black text-tint uppercase tracking-[0.3em] sm:tracking-[0.4em] animate-pulse-subtle bg-tint/5 px-8 py-3 sm:px-10 sm:py-4 rounded-full border border-tint/20">Click to start</span>
             </button>

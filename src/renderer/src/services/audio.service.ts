@@ -27,6 +27,10 @@ class AudioService {
 
     this.log(`Attempting to play: ${sfx.name} (Volume: ${finalVolume}%)`, 'info')
 
+    window.dispatchEvent(new CustomEvent('sfx-played', { 
+        detail: { sfxId: sfx.id, playlistId: _playlistId } 
+    }))
+
     // Handle play modes
     if (store.playMode === 'exclusive') {
         soundEngine.stopAll()

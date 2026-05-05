@@ -16,6 +16,7 @@ interface SoundState {
   playMode: PlayMode
   translations: any
   playingSfxId: string | null
+  isHotkeyEnabled: boolean
 
   // Actions
   init: () => Promise<void>
@@ -25,6 +26,7 @@ interface SoundState {
   setLibraryMasterVolume: (vol: number) => void
   setPlayMode: (mode: PlayMode) => void
   setPlayingSfxId: (id: string | null) => void
+  setHotkeyEnabled: (enabled: boolean) => void
   
   importLocalSound: (path: string) => Promise<void>
   removeSound: (id: string) => void
@@ -50,6 +52,7 @@ export const useSoundStore = create<SoundState>((set, get) => ({
   playMode: 'overlap',
   translations: {},
   playingSfxId: null,
+  isHotkeyEnabled: true,
 
   init: async () => {
     set({ isLoading: true })
@@ -142,6 +145,8 @@ export const useSoundStore = create<SoundState>((set, get) => ({
   },
 
   setPlayingSfxId: (playingSfxId) => set({ playingSfxId }),
+  
+  setHotkeyEnabled: (enabled) => set({ isHotkeyEnabled: enabled }),
   
   importLocalSound: async (path: string) => {
     const sfx = await fileService.importSound(path)

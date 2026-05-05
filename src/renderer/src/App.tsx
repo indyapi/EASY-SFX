@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const sounds = useSoundStore((state) => state.sounds)
   const theme = useSoundStore((state) => state.theme)
   const libraryMasterVolume = useSoundStore((state) => state.libraryMasterVolume)
+  const isHotkeyEnabled = useSoundStore((state) => state.isHotkeyEnabled)
   const t = useSoundStore((state) => state.translations)
 
   useEffect(() => {
@@ -37,27 +38,29 @@ const App: React.FC = () => {
   useEffect(() => {
     hotkeyService.init()
     
-    // Register all hotkeys from all playlists
-    playlists.forEach(pl => {
-      pl.items.forEach(item => {
-        if (item.hotkey) {
-          const sfx = sounds.find(s => s.id === item.rootId)
-          if (sfx) {
-            hotkeyService.register(item.hotkey, () => {
-              // Use the calculated volume with master multiplier
-              const finalVolume = (item.volume / 100) * (pl.masterVolume / 100) * 100
-              audioService.play(sfx, pl.id, finalVolume)
-            })
-          }
-        }
-      })
-    })
+    if (isHotkeyEnabled) {
+        // Register all hotkeys from all playlists
+        playlists.forEach(pl => {
+          pl.items.forEach(item => {
+            if (item.hotkey) {
+              const sfx = sounds.find(s => s.id === item.rootId)
+              if (sfx) {
+                hotkeyService.register(item.hotkey, () => {
+                  // Use the calculated volume with master multiplier
+                  const finalVolume = (item.volume / 100) * (pl.masterVolume / 100) * 100
+                  audioService.play(sfx, pl.id, finalVolume)
+                })
+              }
+            }
+          })
+        })
+    }
 
     return () => {
       hotkeyService.unregisterAll()
       hotkeyService.destroy()
     }
-  }, [playlists, sounds])
+  }, [playlists, sounds, isHotkeyEnabled])
 
   if (isLoading || !t.common) {
     return (
