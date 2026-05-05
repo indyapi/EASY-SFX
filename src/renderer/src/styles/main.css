@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    @apply antialiased overflow-hidden select-none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 9999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes ping-large {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(15); opacity: 0; }
+}
+
+@keyframes scale-in {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+.animate-ping {
+  animation: ping-large 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite ease-in-out;
+}
+
+@layer components {
+  .btn-tint {
+    background-color: var(--tint-color);
+    color: #000000;
+    @apply font-bold transition-all hover:opacity-90 active:scale-95;
+  }
+
+  .nav-bg {
+    background-color: var(--bg-nav);
+    border-color: var(--border-color);
+    position: relative;
+    z-index: 50;
+  }
+
+  .card-bg {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+  }
+
+  .card-bg:hover {
+    background-color: var(--bg-card-hover);
+    border-color: rgba(0, 217, 255, 0.3);
+  }
+
+  /* Custom Range Input Styling */
+  input[type='range'] {
+    @apply appearance-none bg-transparent cursor-pointer;
+  }
+
+  input[type='range']::-webkit-slider-runnable-track {
+    @apply w-full h-1 rounded-full;
+    background-color: var(--bg-nav);
+    border: 1px solid var(--border-color);
+  }
+
+  input[type='range']::-webkit-slider-thumb {
+    @apply appearance-none h-3 w-3 rounded-full -mt-1;
+    background-color: var(--tint-color);
+    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+  }
+}

@@ -1,0 +1,25 @@
+:root {
+  --bg-app: #fffdf5;
+  --bg-nav: #fdfaf0;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fcf9e8;
+  --text-primary: #3d3d3d;
+  --text-secondary: #7a7a7a;
+  --border-color: #eee9d5;
+  --tint-color: #00acc1;
+  --tint-hover: #0097a7;
+  --scrollbar-thumb: #e0dbca;
+}
+
+body.theme-light {
+    --bg-app: #fffdf5;
+    --bg-nav: #fdfaf0;
+    --bg-card: #ffffff;
+    --bg-card-hover: #fcf9e8;
+    --text-primary: #3d3d3d;
+    --text-secondary: #7a7a7a;
+    --border-color: #eee9d5;
+    --tint-color: #00acc1;
+    --tint-hover: #0097a7;
+    --scrollbar-thumb: #e0dbca;
+}
