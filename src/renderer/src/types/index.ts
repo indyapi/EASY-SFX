@@ -24,16 +24,16 @@ export type FavoriteFolder = {
 export type PlaylistItem = {
   id: string
   rootId: string // reference SFX.id
-  customName: string
-  hotkey: string // VK code (KeyA, KeyB...)
-  volume: number // 0 - 200
+  rootName: string // original name for fallback
+  customName?: string // user-defined name
+  filePath: string // full path for direct playing
+  hotkey: string // VK code combo (e.g. Ctrl+KeyA)
+  volume: number // 0 - 100
 }
 
 export type Playlist = {
   id: string
   name: string
-  locked: boolean
-  passwordHash?: string
   masterVolume: number // 0 - 100
   items: PlaylistItem[]
   createdAt: string

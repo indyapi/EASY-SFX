@@ -168,7 +168,6 @@ export const useSoundStore = create<SoundState>((set, get) => ({
     const pl: Playlist = {
       id,
       name,
-      locked: false,
       masterVolume: 100,
       items: [],
       createdAt: new Date().toISOString()

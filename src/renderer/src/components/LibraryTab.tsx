@@ -65,7 +65,7 @@ const LibraryTab: React.FC = () => {
             <div className="flex items-center gap-3 min-w-[160px]">
               <span className="text-[9px] font-black text-secondary uppercase tracking-widest opacity-40 whitespace-nowrap">Vol:</span>
               <input 
-                type="range" min="0" max="200" value={libraryMasterVolume} 
+                type="range" min="0" max="100" value={libraryMasterVolume} 
                 onChange={(e) => setLibraryMasterVolume(parseInt(e.target.value))}
                 className="flex-1 h-1 bg-black/30 rounded-lg appearance-none cursor-pointer accent-tint"
               />
@@ -112,12 +112,7 @@ const LibraryTab: React.FC = () => {
               : t.library?.noSounds}
           </div>
         ) : (
-          <div 
-            className="grid gap-4 pb-12"
-            style={{ 
-              gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` 
-            }}
-          >
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 sm:gap-6 pb-12">
             {filteredLocal.map((sfx) => (
               <SFXCard key={sfx.id} sfx={sfx} onDelete={() => removeSound(sfx.id)} />
             ))}
